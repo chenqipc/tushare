@@ -8,7 +8,7 @@ from log_utils import LoggerManager
 api = EastMoneyAPI()
 notify = NotificationManager()
 
-def get_ma_data(ts_code, period='D', start_date=None, end_date=None):
+def get_ma_data(ts_code, period='D', start_date=None, end_date=None, ts_name=None):
     """
     获取ETF在指定周期的数据并计算移动平均线
     
@@ -20,9 +20,14 @@ def get_ma_data(ts_code, period='D', start_date=None, end_date=None):
             - D - 日线
         start_date: 开始日期
         end_date: 结束日期
+        ts_name: ETF中文名称
     """
+    # 如果没有提供中文名称，使用代码作为名称
+    if ts_name is None:
+        ts_name = ts_code
+        
     # 使用日志工具类获取日志记录器
-    logger = LoggerManager.get_logger(ts_code)
+    logger = LoggerManager.get_logger(f"{ts_code}_{ts_name}")
     
     if start_date is None:
         start_date = (datetime.today() - timedelta(days=120)).strftime('%Y%m%d')
@@ -58,18 +63,28 @@ def get_ma_data(ts_code, period='D', start_date=None, end_date=None):
         return None
 
 
-def check_ma_cross(df, ts_code=None, period_name=None):
+def check_ma_cross(df, ts_code=None, period_name=None, ts_name=None):
     """
     检查是否上穿三条均线
     返回：
         - True: 当前价格在三条均线上方
         - False: 当前价格未在三条均线上方
+    
+    参数：
+        df: 数据框
+        ts_code: 股票或ETF代码
+        period_name: 周期名称
+        ts_name: 股票或ETF中文名称
     """
     if df is None or df.empty or len(df) < 2:
         return False
     
+    # 如果没有提供中文名称，使用代码作为名称
+    if ts_name is None:
+        ts_name = ts_code
+    
     # 使用日志工具类获取日志记录器
-    logger = LoggerManager.get_logger(ts_code) if ts_code else None
+    logger = LoggerManager.get_logger(f"{ts_code}_{ts_name}") if ts_code else None
         
     # 获取最新一条和前一条数据
     latest = df.iloc[-1]
@@ -93,69 +108,74 @@ def check_ma_cross(df, ts_code=None, period_name=None):
         # 判断是否上穿10日均线或下穿10日均线
         if price > ma10:
             if prev_price <= ma10:
-                message = f"{ts_code} 在 {period_name} 周期当前价格上穿了10日均线"
-                notify.show_notification(ts_code, message, 5)
+                message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格上穿了10日均线"
+                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
-                logger.info(f"{ts_code} 在 {period_name} 周期当前价格持续在10日均线上方")
+                logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在10日均线上方")
         else:
             if prev_price >= ma10:
-                message = f"{ts_code} 在 {period_name} 周期当前价格下穿了10日均线"
-                notify.show_notification(ts_code, message, 5)
+                message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格下穿了10日均线"
+                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
-                logger.info(f"{ts_code} 在 {period_name} 周期当前价格持续在10日均线下方")
+                logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在10日均线下方")
                 
         # 判断是否上穿30日均线或下穿30日均线
         if price > ma30:
             if prev_price <= ma30:
-                message = f"{ts_code} 在 {period_name} 周期当前价格上穿了30日均线"
-                notify.show_notification(ts_code, message, 5)
+                message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格上穿了30日均线"
+                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
-                logger.info(f"{ts_code} 在 {period_name} 周期当前价格持续在30日均线上方")
+                logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在30日均线上方")
         else:
             if prev_price >= ma30:
-                message = f"{ts_code} 在 {period_name} 周期当前价格下穿了30日均线"
-                notify.show_notification(ts_code, message, 5)
+                message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格下穿了30日均线"
+                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
-                logger.info(f"{ts_code} 在 {period_name} 周期当前价格持续在30日均线下方")
+                logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在30日均线下方")
                 
         # 判断是否上穿60日均线或下穿60日均线
         if price > ma60:
             if prev_price <= ma60:
-                message = f"{ts_code} 在 {period_name} 周期当前价格上穿了60日均线"
-                notify.show_notification(ts_code, message, 5)
+                message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格上穿了60日均线"
+                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
-                logger.info(f"{ts_code} 在 {period_name} 周期当前价格持续在60日均线上方")
+                logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在60日均线上方")
         else:
             if prev_price >= ma60:
-                message = f"{ts_code} 在 {period_name} 周期当前价格下穿了60日均线"
-                notify.show_notification(ts_code, message, 5)
+                message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格下穿了60日均线"
+                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
-                logger.info(f"{ts_code} 在 {period_name} 周期当前价格持续在60日均线下方")
+                logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在60日均线下方")
 
     # 判断价格是否在三条均线上方
     return price > ma10 and price > ma30 and price > ma60
 
 
-def monitor_etf(ts_code, period='D'):
+def monitor_etf(ts_code, period='D', ts_name=None):
     """
     监控ETF在指定周期的均线状态
     
     参数：
         ts_code: ETF代码
         period: 周期，支持 1min/5min/15min/30min/60min/D
+        ts_name: ETF中文名称
     """
+    # 如果没有提供中文名称，使用代码作为名称
+    if ts_name is None:
+        ts_name = ts_code
+        
     # 使用日志工具类获取日志记录器
-    logger = LoggerManager.get_logger(ts_code)
+    logger = LoggerManager.get_logger(f"{ts_code}_{ts_name}")
     
     df = get_ma_data(ts_code, period)
     if df is not None:
         period_name = '日线' if period == 'D' else f'{period}线'
-        is_above_ma = check_ma_cross(df, ts_code, period_name)
+        is_above_ma = check_ma_cross(df, ts_code, period_name, ts_name)
         return is_above_ma
     return False

@@ -18,18 +18,18 @@ class LoggerManager:
         return log_dir
     
     @classmethod
-    def get_logger(cls, ts_code):
+    def get_logger(cls, logger_name):
         """
-        获取指定股票代码的日志记录器
+        获取指定名称的日志记录器
         
         参数：
-            ts_code: 股票或ETF代码
+            logger_name: 日志记录器名称，通常是股票代码_中文名称
         """
-        if ts_code in cls._loggers:
-            return cls._loggers[ts_code]
+        if logger_name in cls._loggers:
+            return cls._loggers[logger_name]
         
         # 创建新的日志记录器
-        logger = logging.getLogger(f"etf_monitor_{ts_code}")
+        logger = logging.getLogger(f"etf_monitor_{logger_name}")
         logger.setLevel(logging.INFO)
         
         # 防止日志重复输出
@@ -38,11 +38,13 @@ class LoggerManager:
             log_dir = cls.setup_log_dir()
             
             # 创建文件处理器，使用 RotatingFileHandler 限制文件大小
-            log_file = os.path.join(log_dir, f"{ts_code}.log")
+            # 使用 logger_name 作为文件名，确保包含中文名称
+            log_file = os.path.join(log_dir, f"{logger_name}.log")
             file_handler = RotatingFileHandler(
                 log_file, 
                 maxBytes=10*1024*1024,  # 10MB
-                backupCount=5
+                backupCount=5,
+                encoding='utf-8'  # 确保支持中文
             )
             
             # 设置日志格式
@@ -58,5 +60,5 @@ class LoggerManager:
             logger.addHandler(console_handler)
         
         # 缓存日志记录器
-        cls._loggers[ts_code] = logger
+        cls._loggers[logger_name] = logger
         return logger
