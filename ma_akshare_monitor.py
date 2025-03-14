@@ -25,19 +25,32 @@ def merge_60min_to_120min(symbol):
         }).reset_index(drop=True)
     return df
 
+def get_valid_etf_code(symbol):
+    """
+    检查ETF代码是否有效
+    """
+    try:
+        # 获取所有ETF列表
+        etf_df = ak.fund_etf_spot_em()
+        # 检查代码是否存在
+        if symbol in etf_df['代码'].values:
+            return True
+        else:
+            print(f"ETF代码 {symbol} 不存在，请检查代码是否正确")
+            return False
+    except Exception as e:
+        print(f"检查ETF代码失败：{str(e)}")
+        return False
+
 def get_ma_data_ak(symbol, period='daily', start_date=None, end_date=None):
     """
     使用AKShare获取ETF在指定周期的数据并计算移动平均线
-    
-    参数：
-        symbol: ETF代码（如：159915）
-        period: 周期，支持：
-            - 1/5/15/30/60/120 - 分钟
-            - daily - 日线
-        start_date: 开始日期
-        end_date: 结束日期
     """
     try:
+        # 首先验证ETF代码是否有效
+        if not get_valid_etf_code(symbol):
+            return None
+            
         if period == 'daily':
             # 获取日线数据
             df = ak.fund_etf_hist_em(symbol=symbol, period="daily", start_date=start_date, end_date=end_date)
@@ -91,7 +104,7 @@ def monitor_etf_ak(symbol, period='daily'):
 
 # 使用示例
 if __name__ == '__main__':
-    etf_code = '159915'  # 创业板ETF
+    etf_code = '512980'  # 创业板ETF
     
     # 监控不同周期
     periods = ['daily', '120', '60', '15', '1']
