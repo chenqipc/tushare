@@ -101,20 +101,61 @@ def setup_monitoring_tasks(symbols_to_monitor, interval_minutes=15):
                 used_offsets.add(offset_minutes)
                 break
         
-        # 立即执行第一个股票的监控
-        if i == 0:
+        # 立即执行第一个股票的监控（如果当前是交易时间）
+        if i == 0 and is_trading_time():
             main_logger.info(f"立即开始监控 {symbol_code} ({symbol_name})")
             monitor_symbol(symbol_code, symbol_name=symbol_name)
         
         # 设置定时任务，使用错开的时间
         schedule.every(interval_minutes).minutes.at(f":{offset_minutes:02d}").do(
-            monitor_symbol, 
+            scheduled_monitor, 
             symbol_code=symbol_code, 
             symbol_name=symbol_name
         )
         main_logger.info(f"已设置 {symbol_code} ({symbol_name}) 的监控任务，每{interval_minutes}分钟执行一次，偏移{offset_minutes}分钟")
     
     main_logger.info("所有监控任务已设置，开始运行调度器...")
+
+
+def is_trading_time():
+    """
+    判断当前是否是A股交易时间
+    
+    返回：
+        - True: 当前是交易时间（工作日9:00-15:00）
+        - False: 当前不是交易时间
+    """
+    now = datetime.now()
+    
+    # 检查是否是周末（5是周六，6是周日）
+    if now.weekday() >= 5:
+        return False
+    
+    # 检查是否在交易时间内（9:00-15:00）
+    trading_start = datetime(now.year, now.month, now.day, 9, 0, 0)
+    trading_end = datetime(now.year, now.month, now.day, 15, 0, 0)
+    
+    return trading_start <= now <= trading_end
+
+
+def scheduled_monitor(symbol_code, symbol_name=None):
+    """
+    定时任务调用的监控函数，会先检查是否是交易时间
+    
+    参数：
+        symbol_code: 股票或ETF代码
+        symbol_name: 股票或ETF中文名称
+    """
+    # 获取主日志记录器
+    main_logger = LoggerManager.get_logger('main')
+    
+    # 检查是否是交易时间
+    if not is_trading_time():
+        main_logger.info(f"当前不是交易时间，跳过 {symbol_code} ({symbol_name}) 的监控")
+        return
+    
+    # 是交易时间，执行监控
+    monitor_symbol(symbol_code, symbol_name=symbol_name)
 
 
 def start_scheduler():
