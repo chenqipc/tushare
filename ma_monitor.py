@@ -105,34 +105,41 @@ def check_ma_cross(df, ts_code=None, period_name=None, ts_name=None):
     
     # 只有当提供了代码和周期名称时才记录详细信息
     if ts_code and period_name and logger:
+        # 判断是否需要发送通知（只在30分钟和60分钟周期）
+        should_notify = period_name in ['30min线', '60min线', '120min线']
+        
         # 判断是否上穿10日均线或下穿10日均线
         if price > ma10:
             if prev_price <= ma10:
                 message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格上穿了10日均线"
-                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
+                if should_notify:
+                    notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
                 logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在10日均线上方")
         else:
             if prev_price >= ma10:
                 message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格下穿了10日均线"
-                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
+                if should_notify:
+                    notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
                 logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在10日均线下方")
-                
+        
         # 判断是否上穿30日均线或下穿30日均线
         if price > ma30:
             if prev_price <= ma30:
                 message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格上穿了30日均线"
-                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
+                if should_notify:
+                    notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
                 logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在30日均线上方")
         else:
             if prev_price >= ma30:
                 message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格下穿了30日均线"
-                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
+                if should_notify:
+                    notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
                 logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在30日均线下方")
@@ -141,14 +148,16 @@ def check_ma_cross(df, ts_code=None, period_name=None, ts_name=None):
         if price > ma60:
             if prev_price <= ma60:
                 message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格上穿了60日均线"
-                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
+                if should_notify:
+                    notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
                 logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在60日均线上方")
         else:
             if prev_price >= ma60:
                 message = f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格下穿了60日均线"
-                notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
+                if should_notify:
+                    notify.show_notification(f"{ts_code} ({ts_name})", message, 5)
                 logger.info(message)
             else:
                 logger.info(f"{ts_code} ({ts_name}) 在 {period_name} 周期当前价格持续在60日均线下方")
