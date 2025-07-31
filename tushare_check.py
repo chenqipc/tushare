@@ -76,6 +76,10 @@ def daily_check(ts_code, stock_name):
         if is_double_bottom(daily_data):
             result.append(StockStatus.DOUBLE_BOTTOM)
 
+        # 双底结构new
+        if is_double_bottom_new(daily_data):
+            result.append(StockStatus.DOUBLE_BOTTOM_NEW)
+
         # 横盘期后出现放量上涨。
         if is_breakout_after_consolidation(daily_data):
             result.append(StockStatus.BREAKOUT_AFTER_CONSOLIDATION)
@@ -83,6 +87,9 @@ def daily_check(ts_code, stock_name):
         # 是否处于上涨初期
         if is_upward_trend(daily_data):
             result.append(StockStatus.IS_UPWARD_TREND)
+
+        if is_funds_inflow_by_volume_turnover(daily_data):
+            result.append(StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER)
 
         return result if result else [StockStatus.NO_MATCH]
 
@@ -574,4 +581,74 @@ def is_upward_trend(daily_data):
             if is_macd_golden_cross(daily_data):
                 return True
 
+    return False
+
+
+def is_double_bottom_new(daily_data, window=10, price_diff=0.05, min_days=5, max_days=30, volume_ratio=1.2):
+    """
+    检测双底结构：
+    1. 两个低点价格接近，间隔合适
+    2. 第二底成交量小于第一底
+    3. 反弹突破颈线且放量
+    """
+    if len(daily_data) < window * 3:
+        return False
+
+    closes = daily_data['close'].values
+    vols = daily_data['vol'].values
+    bottoms = []
+    # 1. 用滑动窗口找局部低点
+    for i in range(window, len(closes) - window):
+        window_slice = closes[i - window:i + window + 1]
+        if closes[i] == window_slice.min():
+            bottoms.append(i)
+    # 2. 检查所有可能的双底组合
+    for i in range(len(bottoms) - 1):
+        idx1, idx2 = bottoms[i], bottoms[i + 1]
+        if not (min_days <= idx2 - idx1 <= max_days):
+            continue
+        price1, price2 = closes[idx1], closes[idx2]
+        if abs(price1 - price2) / price1 > price_diff:
+            continue
+        # 颈线
+        neckline = closes[idx1:idx2].max()
+        vol1, vol2 = vols[idx1], vols[idx2]
+        if vol2 >= vol1:
+            continue
+        # 3. 突破颈线且放量
+        after_idx2 = daily_data.iloc[idx2 + 1:]
+        breakout = after_idx2[after_idx2['close'] > neckline]
+        if not breakout.empty:
+            breakout_idx = breakout.index[0]
+            breakout_vol = daily_data.loc[breakout_idx, 'vol']
+            avg_vol = daily_data['vol'].iloc[max(0, idx2 - 5):idx2].mean()
+            if breakout_vol > avg_vol * volume_ratio:
+                return True
+    return False
+
+
+def is_funds_inflow_by_volume_turnover(daily_data, n=7, m=30, ratio=1.2, pct_positive=0.66):
+    """
+    结合成交量和换手率判断资金流入（最近n天大部分为正涨幅）
+    :param daily_data: 股票每日数据，需包含'vol'、'turnover_rate'、'pct_chg'
+    :param n: 最近n天
+    :param m: 前m天
+    :param ratio: 放大倍数阈值
+    :param pct_positive: 最近n天中正涨幅天数占比（如0.66表示2/3为正）
+    :return: True/False
+    """
+    if len(daily_data) < n + m:
+        return False
+
+    vol_recent = daily_data['vol'].iloc[-n:].mean()
+    vol_ref = daily_data['vol'].iloc[-(n + m):-n].mean()
+    turnover_recent = daily_data['turnover_rate'].iloc[-n:].mean()
+    turnover_ref = daily_data['turnover_rate'].iloc[-(n + m):-n].mean()
+
+    # 判断成交量和换手率均放大
+    if vol_recent > vol_ref * ratio and turnover_recent > turnover_ref * ratio:
+        # 统计最近n天正涨幅天数
+        positive_days = (daily_data['pct_chg'].iloc[-n:] > 0).sum()
+        if positive_days >= int(n * pct_positive):
+            return True
     return False
