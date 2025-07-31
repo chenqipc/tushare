@@ -1,6 +1,6 @@
 import time
 import pandas as pd
-import StockEnum
+from common import StockEnum
 from tushare_check import daily_check
 import os
 
@@ -13,7 +13,7 @@ def traversal():
         file_dict[stock_status] = f
 
     # 读取存储的股票数据
-    stock_data = pd.read_json('stock_data.json')
+    stock_data = pd.read_json('resource/stock_data.json')
 
     for index, row in stock_data.iterrows():
         if not isinstance(index, int):

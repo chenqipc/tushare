@@ -2,7 +2,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from eastmoney_crawler import EastMoneyAPI
 from gui_utils import NotificationManager
-from log_utils import LoggerManager
+from common.log_utils import LoggerManager
 
 # 初始化东方财富API
 api = EastMoneyAPI()

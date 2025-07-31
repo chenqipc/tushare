@@ -1,10 +1,11 @@
-import pandas as pd
-from datetime import datetime, timedelta
 import time
+from datetime import datetime, timedelta
+
 import schedule
+
 from eastmoney_crawler import EastMoneyAPI
+from common.log_utils import LoggerManager
 from ma_monitor import get_ma_data, check_ma_cross
-from log_utils import LoggerManager
 
 # 初始化东方财富API
 api = EastMoneyAPI()
@@ -67,8 +68,7 @@ def setup_monitoring_tasks(symbols_to_monitor):
     参数：
         symbols_to_monitor: 要监控的股票或ETF代码列表格式为 [代码, 中文名称]
     """
-    import random
-    
+
     # 获取主日志记录器
     main_logger = LoggerManager.get_logger('main')
     

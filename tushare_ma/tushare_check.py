@@ -1,8 +1,7 @@
 import tushare as ts
-import pandas as pd
 from datetime import datetime, timedelta
-from tushare_token import tushare_token
-from StockEnum import StockStatus
+from common.tushare_token import tushare_token
+from common.StockEnum import StockStatus
 
 # 初始化pro接口
 pro = ts.pro_api(tushare_token)
@@ -88,8 +87,8 @@ def daily_check(ts_code, stock_name):
         if is_upward_trend(daily_data):
             result.append(StockStatus.IS_UPWARD_TREND)
 
-        if is_funds_inflow_by_volume_turnover(daily_data):
-            result.append(StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER)
+        # if is_funds_inflow_by_volume_turnover(daily_data):
+        #     result.append(StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER)
 
         return result if result else [StockStatus.NO_MATCH]
 

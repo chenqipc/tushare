@@ -1,5 +1,5 @@
 import tushare as ts
-from tushare_token import tushare_token
+from common.tushare_token import tushare_token
 
 
 def all_stock():
