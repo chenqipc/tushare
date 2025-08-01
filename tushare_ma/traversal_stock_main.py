@@ -1,13 +1,20 @@
 import time
 import pandas as pd
+import os
+import sys
+
+# 添加项目根目录到sys.path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from common import StockEnum
 from tushare_check import daily_check
-import os
 
 
 def traversal():
+    # 获取项目根目录
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # 确保resource目录存在
-    resource_dir = 'resource'
+    resource_dir = os.path.join(project_root, 'resource')
     if not os.path.exists(resource_dir):
         os.makedirs(resource_dir)
         
@@ -18,7 +25,8 @@ def traversal():
         file_dict[stock_status] = f
 
     # 读取存储的股票数据
-    stock_data = pd.read_json('resource/stock_data.json')
+    stock_data_path = os.path.join(project_root, 'resource', 'stock_data.json')
+    stock_data = pd.read_json(stock_data_path)
 
     for index, row in stock_data.iterrows():
         if not isinstance(index, int):
@@ -97,7 +105,7 @@ def traversal():
         file_obj.close()
 
     for stock_status in StockEnum.StockStatus:
-        file_name = os.path.join('resource', f"{stock_status.value}.txt")
+        file_name = os.path.join(project_root, 'resource', f"{stock_status.value}.txt")
         remove_empty_file(file_name)
 
 
