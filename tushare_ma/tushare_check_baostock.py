@@ -3,12 +3,13 @@ from datetime import datetime, timedelta
 from common.tushare_token import tushare_token
 from common.StockEnum import StockStatus
 
-# 初始化pro接口
-pro = ts.pro_api(tushare_token)
-ts.set_token("2876ea85cb005fb5fa17c809a98174f2d5aae8b1f830110a5ead6211")
+import baostock as bs
+import pandas as pd
 
 
 def daily_check(ts_code, stock_name):
+    # 登录baostock
+    lg = bs.login()
     # 排除ST股票
     if 'ST' in stock_name:
         return [StockStatus.NO_MATCH]
@@ -19,19 +20,53 @@ def daily_check(ts_code, stock_name):
 
     # 获取当前日期
     today = datetime.today()
-    fifteen_days_ago = today - timedelta(days=90)
-    start_date = fifteen_days_ago.strftime('%Y%m%d')
-    end_date = today.strftime('%Y%m%d')
+    fifteen_days_ago = today - timedelta(days=200)
+    start_date = fifteen_days_ago.strftime('%Y-%m-%d')
+    end_date = today.strftime('%Y-%m-%d')
 
-    # 获取股票过去days天的每日数据
-    # daily_data = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
-    daily_data = ts.pro_bar(ts_code=ts_code, start_date=start_date, end_date=end_date, factors=['tor', 'vr'])
+    ts_code.replace('.', '.')
+    rs = bs.query_history_k_data_plus(
+        ts_code,  # baostock用类似"sz.000001"
+        "date,code,open,high,low,close,volume,amount,pctChg",
+        start_date=start_date,
+        end_date=end_date,
+        frequency="d",
+        adjustflag="3"
+    )
+
+    # 转为DataFrame
+    data_list = []
+    while (rs.error_code == '0') & rs.next():
+        data_list.append(rs.get_row_data())
+    daily_data = pd.DataFrame(data_list, columns=rs.fields)
+
+    # 字段名适配
+    daily_data.rename(columns={
+        "volume": "vol",
+        "pctChg": "pct_chg"
+    }, inplace=True)
+
+    # 统一类型转换
+    for col in ["open", "high", "low", "close", "vol", "amount", "pct_chg"]:
+        daily_data[col] = daily_data[col].astype(float)
+
     # print(daily_data)
+
+    # 获取流通股本
+    rs2 = bs.query_stock_basic(code=ts_code)
+    float_share = None
+    while rs2.next():
+        print(rs2.get_row_data())
+        float_share = float(rs2.get_row_data()[8]) * 10000  # floatShare字段，单位万股
+        print("float_share:%s" % float_share)
+    daily_data["turnover_rate"] = daily_data["vol"] / float_share * 100
+
+    bs.logout()
 
     # 检查数据是否足够（至少有7天数据）
     if len(daily_data) >= 7:
         # 排序为正序，最新的在最后
-        daily_data = daily_data.sort_values(by='trade_date', ascending=True)
+        daily_data = daily_data.sort_values(by='date', ascending=True)
         # 重置索引，但保持排序
         daily_data = daily_data.reset_index(drop=True)
 
@@ -89,8 +124,8 @@ def daily_check(ts_code, stock_name):
         if is_upward_trend(daily_data):
             result.append(StockStatus.IS_UPWARD_TREND)
 
-        if is_funds_inflow_by_volume_turnover(daily_data):
-            result.append(StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER)
+        # if is_funds_inflow_by_volume_turnover(daily_data):
+        #     result.append(StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER)
 
         return result if result else [StockStatus.NO_MATCH]
 
