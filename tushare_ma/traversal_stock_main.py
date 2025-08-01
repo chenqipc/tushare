@@ -68,6 +68,10 @@ def traversal():
             print(f"[{ts_code}][{name}] 出现双底结构")
             file_dict[StockEnum.StockStatus.DOUBLE_BOTTOM].write(f"{ts_code} {name}\n")
             file_dict[StockEnum.StockStatus.DOUBLE_BOTTOM].flush()
+        if StockEnum.StockStatus.DOUBLE_BOTTOM_NEW in res:
+            print(f"[{ts_code}][{name}] 出现双底结构(新)")
+            file_dict[StockEnum.StockStatus.DOUBLE_BOTTOM_NEW].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.DOUBLE_BOTTOM_NEW].flush()
         if StockEnum.StockStatus.BREAKOUT_AFTER_CONSOLIDATION in res:
             print(f"[{ts_code}][{name}] 横盘后放量上涨")
             file_dict[StockEnum.StockStatus.BREAKOUT_AFTER_CONSOLIDATION].write(f"{ts_code} {name}\n")
