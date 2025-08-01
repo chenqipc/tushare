@@ -6,9 +6,14 @@ import os
 
 
 def traversal():
+    # 确保resource目录存在
+    resource_dir = 'resource'
+    if not os.path.exists(resource_dir):
+        os.makedirs(resource_dir)
+        
     file_dict = {}
     for stock_status in StockEnum.StockStatus:
-        file_name = f"{stock_status.value}.txt"
+        file_name = os.path.join(resource_dir, f"{stock_status.value}.txt")
         f = open(file_name, 'w')
         file_dict[stock_status] = f
 
@@ -75,6 +80,10 @@ def traversal():
             print(f"[{ts_code}][{name}] 最近7天MACD金叉")
             file_dict[StockEnum.StockStatus.MACD_GOLDEN_CROSS_OVER_7].write(f"{ts_code} {name}\n")
             file_dict[StockEnum.StockStatus.MACD_GOLDEN_CROSS_OVER_7].flush()
+        if StockEnum.StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER in res:
+            print(f"[{ts_code}][{name}] 成交量换手率放大")
+            file_dict[StockEnum.StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.FUNDS_INFLOW_BY_VOLUME_TURNOVER].flush()
 
         # 延迟3秒
         time.sleep(1)
@@ -84,7 +93,7 @@ def traversal():
         file_obj.close()
 
     for stock_status in StockEnum.StockStatus:
-        file_name = f"{stock_status.value}.txt"
+        file_name = os.path.join('resource', f"{stock_status.value}.txt")
         remove_empty_file(file_name)
 
 

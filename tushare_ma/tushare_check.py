@@ -658,11 +658,17 @@ def is_funds_inflow_by_volume_turnover(daily_data, n=7, m=30, ratio=1.2, pct_pos
     """
     if len(daily_data) < n + m:
         return False
+        
+    # 检查数据中是否包含换手率字段
+    turnover_field = 'turnover_rate' if 'turnover_rate' in daily_data.columns else 'tor'
+    if turnover_field not in daily_data.columns:
+        print(f"数据中缺少换手率字段: {daily_data.columns}")
+        return False
 
     vol_recent = daily_data['vol'].iloc[-n:].mean()
     vol_ref = daily_data['vol'].iloc[-(n + m):-n].mean()
-    turnover_recent = daily_data['turnover_rate'].iloc[-n:].mean()
-    turnover_ref = daily_data['turnover_rate'].iloc[-(n + m):-n].mean()
+    turnover_recent = daily_data[turnover_field].iloc[-n:].mean()
+    turnover_ref = daily_data[turnover_field].iloc[-(n + m):-n].mean()
 
     # 判断成交量和换手率均放大
     if vol_recent > vol_ref * ratio and turnover_recent > turnover_ref * ratio:
