@@ -34,36 +34,47 @@ def traversal():
         if StockEnum.StockStatus.THREE_LIMIT_UP in res:
             print(f"[{ts_code}][{name}] 连续3天涨停")
             file_dict[StockEnum.StockStatus.THREE_LIMIT_UP].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.THREE_LIMIT_UP].flush()
         if StockEnum.StockStatus.THREE_LIMIT_UP_ONLY in res:
             print(f"[{ts_code}][{name}] 最近3天涨停")
             file_dict[StockEnum.StockStatus.THREE_LIMIT_UP_ONLY].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.THREE_LIMIT_UP_ONLY].flush()
         if StockEnum.StockStatus.RISING_VOLUME_INCREASE in res:
             print(f"[{ts_code}][{name}] 连续5天上涨且成交量增加")
             file_dict[StockEnum.StockStatus.RISING_VOLUME_INCREASE].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.RISING_VOLUME_INCREASE].flush()
         if StockEnum.StockStatus.VOLUME_SURGE_WITH_PRICE_RISE in res:
             print(f"[{ts_code}][{name}] 出现大幅放量伴随上涨")
             file_dict[StockEnum.StockStatus.VOLUME_SURGE_WITH_PRICE_RISE].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.VOLUME_SURGE_WITH_PRICE_RISE].flush()
         if StockEnum.StockStatus.CAPITAL_INFLOW in res:
             print(f"[{ts_code}][{name}] 出现资金流入明显")
             file_dict[StockEnum.StockStatus.CAPITAL_INFLOW].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.CAPITAL_INFLOW].flush()
         if StockEnum.StockStatus.SUPPORT_LEVEL_REBOUND in res:
             print(f"[{ts_code}][{name}] 出现底部支撑反弹")
             file_dict[StockEnum.StockStatus.SUPPORT_LEVEL_REBOUND].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.SUPPORT_LEVEL_REBOUND].flush()
         if StockEnum.StockStatus.MACD_GOLDEN_CROSS in res:
             print(f"[{ts_code}][{name}] 出现MACD金叉")
             file_dict[StockEnum.StockStatus.MACD_GOLDEN_CROSS].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.MACD_GOLDEN_CROSS].flush()
         if StockEnum.StockStatus.DOUBLE_BOTTOM in res:
             print(f"[{ts_code}][{name}] 出现双底结构")
             file_dict[StockEnum.StockStatus.DOUBLE_BOTTOM].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.DOUBLE_BOTTOM].flush()
         if StockEnum.StockStatus.BREAKOUT_AFTER_CONSOLIDATION in res:
             print(f"[{ts_code}][{name}] 横盘后放量上涨")
             file_dict[StockEnum.StockStatus.BREAKOUT_AFTER_CONSOLIDATION].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.BREAKOUT_AFTER_CONSOLIDATION].flush()
         if StockEnum.StockStatus.IS_UPWARD_TREND in res:
             print(f"[{ts_code}][{name}] 处于上涨初期")
             file_dict[StockEnum.StockStatus.IS_UPWARD_TREND].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.IS_UPWARD_TREND].flush()
         if StockEnum.StockStatus.MACD_GOLDEN_CROSS_OVER_7 in res:
             print(f"[{ts_code}][{name}] 最近7天MACD金叉")
             file_dict[StockEnum.StockStatus.MACD_GOLDEN_CROSS_OVER_7].write(f"{ts_code} {name}\n")
+            file_dict[StockEnum.StockStatus.MACD_GOLDEN_CROSS_OVER_7].flush()
 
         # 延迟3秒
         time.sleep(1)

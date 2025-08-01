@@ -1,3 +1,5 @@
+import time
+
 import tushare as ts
 from datetime import datetime, timedelta
 from common.tushare_token import tushare_token
@@ -25,7 +27,7 @@ def daily_check(ts_code, stock_name):
 
     # 获取股票过去days天的每日数据
     # daily_data = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
-    daily_data = ts.pro_bar(ts_code=ts_code, start_date=start_date, end_date=end_date, factors=['tor', 'vr'])
+    daily_data = fetch_with_retry(ts_code, start_date, end_date, factors=['tor', 'vr'])
     # print(daily_data)
 
     # 检查数据是否足够（至少有7天数据）
@@ -95,6 +97,22 @@ def daily_check(ts_code, stock_name):
         return result if result else [StockStatus.NO_MATCH]
 
     return [StockStatus.NO_MATCH]
+
+
+def fetch_with_retry(ts_code, start_date, end_date, factors, max_retries=30, initial_wait=2):
+    retry_count = 0
+    wait_time = initial_wait
+    while retry_count < max_retries:
+        try:
+            return ts.pro_bar(ts_code=ts_code, start_date=start_date, end_date=end_date, factors=factors)
+        except Exception as e:
+            print(e)
+            retry_count += 1
+            if retry_count == max_retries:
+                raise
+            time.sleep(wait_time)
+            wait_time *= 2
+
 
 
 def get_recent_days_data(daily_data, days=30, sort=False):
